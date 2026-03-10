@@ -195,6 +195,15 @@ static int inotify_fd = -1;
 static Uint64 last_joy_detect_time;
 static time_t last_input_dir_mtime;
 
+#if defined(ENGINE_MEMCHECK_ENABLED)
+// it seems that on some old glibc versions scandir is not linked to __wrap_scandir
+extern int __wrap_scandir(
+    const char *restrict dirp, struct dirent ***restrict namelist,
+    typeof(int(const struct dirent *)) *filter,
+    typeof(int(const struct dirent **, const struct dirent **)) *compar);
+#define scandir __wrap_scandir
+#endif
+
 static void FixupDeviceInfoForMapping(int fd, struct input_id *inpid)
 {
     if (inpid->vendor == 0x045e && inpid->product == 0x0b05 && inpid->version == 0x0903) {
